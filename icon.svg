@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#1e3a5f"/>
+
+  <!-- Amber accent bar -->
+  <rect x="64" y="310" width="384" height="56" rx="16" fill="#f59e0b"/>
+
+  <!-- Car silhouette (white) -->
+  <!-- Car body upper -->
+  <path d="M140 240 L180 170 Q188 158 200 158 L312 158 Q324 158 332 170 L372 240 Z" fill="white" opacity="0.95"/>
+  <!-- Car body lower -->
+  <rect x="100" y="234" width="312" height="80" rx="14" fill="white" opacity="0.95"/>
+
+  <!-- Windows -->
+  <path d="M186 238 L213 178 Q217 170 225 170 L287 170 Q295 170 299 178 L326 238 Z" fill="#1e3a5f" opacity="0.55"/>
+
+  <!-- Window divider -->
+  <rect x="252" y="170" width="6" height="68" rx="3" fill="#1e3a5f" opacity="0.4"/>
+
+  <!-- Left wheel -->
+  <circle cx="180" cy="316" r="46" fill="#1e3a5f"/>
+  <circle cx="180" cy="316" r="28" fill="#e5e7eb"/>
+  <circle cx="180" cy="316" r="12" fill="#1e3a5f"/>
+
+  <!-- Right wheel -->
+  <circle cx="332" cy="316" r="46" fill="#1e3a5f"/>
+  <circle cx="332" cy="316" r="28" fill="#e5e7eb"/>
+  <circle cx="332" cy="316" r="12" fill="#1e3a5f"/>
+
+  <!-- SBA text -->
+  <text x="256" y="422" font-family="'Helvetica Neue', Arial, sans-serif" font-size="52" font-weight="800" fill="white" text-anchor="middle" letter-spacing="4">SBA</text>
+</svg>

@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Uber P&L">
+  <meta name="theme-color" content="#1e3a5f">
+  <title>Uber P&L | SBA</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --navy: #1e3a5f;
+      --navy-light: #2d5a8e;
+      --amber: #f59e0b;
+      --amber-light: #fef3c7;
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #8e8e93;
+      --border: #e5e5ea;
+      --green: #34c759;
+      --red: #ff3b30;
+      --blue: #007aff;
+      --tab-h: 83px;
+      --header-h: 44px;
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    /* ─── Header ─── */
+    .app-header {
+      background: var(--navy);
+      color: white;
+      flex-shrink: 0;
+      padding: calc(var(--sat) + 10px) 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 2px 12px rgba(0,0,0,0.3);
+      z-index: 10;
+    }
+
+    .header-brand { display: flex; align-items: center; gap: 10px; }
+
+    .brand-mark {
+      width: 32px; height: 32px;
+      background: var(--amber);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800;
+      color: var(--navy); letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .brand-text { line-height: 1.2; }
+    .brand-name { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+    .brand-sub { font-size: 11px; opacity: 0.65; }
+
+    .method-pill {
+      font-size: 11px; font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+      background: rgba(245,158,11,0.2);
+      color: var(--amber);
+      border: 1px solid rgba(245,158,11,0.4);
+    }
+
+    /* ─── Content scroll area ─── */
+    .app-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    .tab-panel { display: none; padding: 16px 16px calc(var(--sab) + var(--tab-h) + 8px); }
+    .tab-panel.active { display: block; }
+
+    /* ─── Bottom Tab Bar ─── */
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(var(--tab-h) + var(--sab));
+      background: rgba(249,249,249,0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 0.5px solid rgba(0,0,0,0.18);
+      display: flex;
+      z-index: 100;
+      padding-bottom: var(--sab);
+    }
+
+    .tab-btn {
+      flex: 1; border: none; background: none;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer;
+      color: var(--muted);
+      padding: 6px 4px 0;
+      min-width: 0;
+    }
+
+    .tab-btn.active { color: var(--navy); }
+    .tab-btn svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .tab-btn.active svg { fill: var(--navy); stroke: var(--navy); }
+
+    .tab-label {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+    }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .card-header {
+      padding: 10px 16px 6px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--muted);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .card-body { padding: 0; }
+
+    /* ─── Field rows ─── */
+    .field-row {
+      display: flex; align-items: center;
+      padding: 0 16px;
+      min-height: 44px;
+      border-bottom: 0.5px solid var(--border);
+      gap: 12px;
+    }
+
+    .field-row:last-child { border-bottom: none; }
+
+    .field-label {
+      font-size: 15px;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .field-label.small { font-size: 14px; }
+
+    .field-input {
+      border: none; outline: none;
+      font-size: 16px; /* prevents iOS zoom */
+      color: var(--text);
+      text-align: right;
+      background: transparent;
+      width: 120px;
+      min-width: 0;
+      font-family: inherit;
+      padding: 12px 0;
+    }
+
+    .field-input::placeholder { color: var(--muted); }
+
+    .field-input.full {
+      width: 100%; text-align: left;
+    }
+
+    /* ─── Select ─── */
+    .native-select {
+      border: none; outline: none;
+      font-size: 15px; color: var(--navy);
+      background: transparent;
+      -webkit-appearance: none;
+      text-align: right;
+      font-family: inherit;
+      font-weight: 500;
+      min-width: 100px;
+      cursor: pointer;
+    }
+
+    /* ─── Toggle ─── */
+    .ios-toggle { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+    .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #e9e9ea;
+      border-radius: 15.5px;
+      transition: background 0.2s;
+    }
+    .ios-toggle input:checked + .toggle-track { background: var(--green); }
+    .toggle-knob {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 27px; height: 27px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,0,0,0.04);
+      transition: transform 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .ios-toggle input:checked ~ .toggle-knob { transform: translateX(20px); }
+
+    /* ─── Segment control ─── */
+    .segment {
+      display: flex;
+      background: rgba(118,118,128,0.12);
+      border-radius: 9px;
+      padding: 2px;
+      margin: 12px 16px;
+    }
+
+    .seg-btn {
+      flex: 1; height: 32px;
+      border: none; border-radius: 7px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; background: transparent;
+      color: var(--text); transition: all 0.15s;
+    }
+
+    .seg-btn.active {
+      background: white;
+      color: var(--navy);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.04);
+    }
+
+    /* ─── Info box ─── */
+    .info-box {
+      background: rgba(0,122,255,0.08);
+      border-left: 3px solid var(--blue);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #1a4080;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .warn-box {
+      background: rgba(245,158,11,0.1);
+      border-left: 3px solid var(--amber);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #7c5200;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    /* ─── Total / Summary banners ─── */
+    .summary-banner {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      border-radius: 14px;
+      padding: 16px 18px;
+      color: white;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .banner-label { font-size: 14px; opacity: 0.8; }
+    .banner-value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+
+    .km-banner {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      border-radius: 14px;
+      padding: 20px;
+      color: white;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .km-big { font-size: 42px; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+    .km-sub { font-size: 12px; opacity: 0.65; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .km-deduct { font-size: 20px; font-weight: 600; color: var(--amber); margin-top: 8px; }
+
+    /* ─── Business % pill ─── */
+    .pct-pill {
+      background: var(--amber);
+      color: white;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: -0.5px;
+    }
+
+    /* ─── Report-specific rows ─── */
+    .report-row {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 0.5px solid var(--border);
+      gap: 12px;
+    }
+
+    .report-row:last-child { border-bottom: none; }
+    .report-row.strong { background: rgba(30,58,95,0.04); }
+
+    .row-label { font-size: 14px; color: var(--text); flex: 1; }
+    .row-label.dim { color: var(--muted); }
+    .row-val { font-size: 14px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+    .row-val.neg { color: var(--red); }
+    .row-val.pos { color: var(--green); }
+    .row-val.big { font-size: 17px; }
+
+    .net-banner {
+      background: linear-gradient(135deg, #0d2240 0%, var(--navy) 100%);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .net-label { color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 600; }
+    .net-value { color: white; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+    .net-value.loss { color: #ff6b6b; }
+
+    /* ─── Buttons ─── */
+    .btn {
+      width: 100%; height: 50px;
+      border: none; border-radius: 14px;
+      font-size: 16px; font-weight: 600;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 10px;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-secondary { background: white; color: var(--navy); border: 1.5px solid var(--border); }
+    .btn-danger { background: #fff5f5; color: var(--red); border: 1.5px solid #fecaca; }
+
+    .btn:active { opacity: 0.8; transform: scale(0.98); }
+
+    /* ─── Section label ─── */
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--muted);
+      padding: 0 4px;
+      margin: 0 0 6px;
+    }
+
+    /* ─── Income month rows ─── */
+    .month-row {
+      display: flex; align-items: center;
+      padding: 0 16px;
+      border-bottom: 0.5px solid var(--border);
+      min-height: 44px; gap: 12px;
+    }
+
+    .month-row:last-child { border-bottom: none; }
+
+    .month-tag {
+      font-size: 14px; font-weight: 600;
+      color: var(--muted); width: 34px;
+      flex-shrink: 0;
+    }
+
+    .month-year-tag {
+      font-size: 11px; color: var(--muted);
+      width: 34px; flex-shrink: 0;
+      line-height: 1.1;
+    }
+
+    .month-input-wrap { flex: 1; position: relative; }
+
+    .dollar-pre {
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px; color: var(--muted);
+      pointer-events: none;
+    }
+
+    .month-input {
+      width: 100%; border: none; outline: none;
+      font-size: 16px; text-align: right;
+      background: transparent; padding: 10px 0 10px 14px;
+      font-family: inherit; color: var(--text);
+    }
+
+    .month-input::placeholder { color: var(--border); }
+
+    /* ─── Print styles ─── */
+    .print-only { display: none; }
+
+    @media print {
+      body { overflow: visible !important; height: auto !important; background: white; }
+      .app-header, .tab-bar { display: none !important; }
+      .app-content { overflow: visible !important; }
+      .tab-panel { display: none !important; padding: 0; }
+      #panel-report { display: block !important; padding: 20px; }
+      .btn, #btnClear { display: none !important; }
+      .print-only { display: block !important; }
+      .card { box-shadow: none !important; border: 0.5px solid #ddd; }
+      .net-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .summary-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      /* DRAFT watermark */
+      body::before {
+        content: 'DRAFT';
+        position: fixed; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 160px; font-weight: 900;
+        color: rgba(0,0,0,0.04);
+        transform: rotate(-35deg);
+        pointer-events: none; z-index: 0;
+        letter-spacing: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="brand-mark">SBA</div>
+    <div class="brand-text">
+      <div class="brand-name">Uber P&amp;L Report</div>
+      <div class="brand-sub" id="headerSub">New client</div>
+    </div>
+  </div>
+  <div class="method-pill" id="headerMethod">Mileage Rate</div>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="app-content">
+
+  <!-- ───────────── TAB 1: CLIENT ───────────── -->
+  <div class="tab-panel active" id="panel-client">
+
+    <p class="section-label">Client</p>
+    <div class="card">
+      <div class="card-header">Client Information</div>
+      <div class="card-body">
+        <div class="field-row">
+          <label class="field-label" for="fClientName">Full Name</label>
+          <input class="field-input" id="fClientName" type="text" placeholder="Client name" oninput="sync()">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="fIrd">IRD Number</label>
+          <input class="field-input" id="fIrd" type="text" placeholder="000-000-000" oninput="sync()">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="fBranch">SBA Branch</label>
+          <select class="native-select" id="fBranch" onchange="sync()">
+            <option>New Brighton</option>
+            <option>Rolleston</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-top:8px;">Tax Year &amp; GST</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="field-row">
+          <label class="field-label" for="fTaxYear">Income year ending</label>
+          <select class="native-select" id="fTaxYear" onchange="sync(); buildMonthRows()">
+            <option value="2025">31 Mar 2025</option>
+            <option value="2026">31 Mar 2026</option>
+            <option value="2024">31 Mar 2024</option>
+            <option value="2023">31 Mar 2023</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <span class="field-label">GST Registered</span>
+          <label class="ios-toggle">
+            <input type="checkbox" id="fGst" onchange="sync()">
+            <div class="toggle-track"></div>
+            <div class="toggle-knob"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-top:8px;">Vehicle Expense Method</p>
+    <div class="card">
+      <div class="card-header">Select Method</div>
+      <div class="card-body">
+        <div class="segment">
+          <button class="seg-btn active" id="segMileage" onclick="setMethod('mileage')">IRD Mileage Rate</button>
+          <button class="seg-btn" id="segActual" onclick="setMethod('actual')">Actual Costs</button>
+        </div>
+        <div style="padding: 0 16px 14px;" id="methodDesc">
+          <div class="info-box">
+            <strong>IRD Mileage Rate:</strong> Claim 83¢/km for first 14,000 business km, then 31¢/km. No receipts needed for vehicle running costs.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───────────── TAB 2: INCOME ───────────── -->
+  <div class="tab-panel" id="panel-income">
+
+    <div class="info-box">Enter gross Uber earnings for each month (before any deductions). Use your Uber driver earnings statements.</div>
+
+    <div class="card">
+      <div class="card-header">Monthly Gross Income</div>
+      <div class="card-body" id="monthRows"></div>
+    </div>
+
+    <div class="summary-banner">
+      <div>
+        <div class="banner-label">Total Gross Income</div>
+        <div style="font-size:13px; opacity:0.6; margin-top:2px;" id="incomeYearLabel">Year ended 31 Mar 2025</div>
+      </div>
+      <div class="banner-value" id="totalIncomeDisplay">$0.00</div>
+    </div>
+
+    <div class="card" id="gstCard" style="display:none;">
+      <div class="card-header">GST Breakdown</div>
+      <div class="card-body">
+        <div class="report-row">
+          <span class="row-label">GST-exclusive income</span>
+          <span class="row-val" id="gstExclDisplay">$0.00</span>
+        </div>
+        <div class="report-row">
+          <span class="row-label dim">GST collected (income × 3/23)</span>
+          <span class="row-val neg" id="gstAmtDisplay">$0.00</span>
+        </div>
+        <div class="report-row strong">
+          <span class="row-label" style="font-weight:700;">Net taxable income</span>
+          <span class="row-val big" id="netIncomeDisplay">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ───────────── TAB 3: EXPENSES ───────────── -->
+  <div class="tab-panel" id="panel-expenses">
+
+    <!-- Vehicle running costs (actual method only) -->
+    <div id="vehicleExpSection" style="display:none;">
+      <div class="warn-box">Actual cost method: Enter all vehicle running costs here. The deductible amount will be calculated using your business use %.</div>
+      <p class="section-label">Vehicle Running Costs</p>
+      <div class="card">
+        <div class="card-body" id="vehicleExpRows">
+          <!-- Built dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label">Other Business Expenses</p>
+    <div class="card">
+      <div class="card-body" id="otherExpRows">
+        <!-- Built dynamically -->
+      </div>
+    </div>
+
+    <div class="summary-banner">
+      <div class="banner-label">Total Deductions</div>
+      <div class="banner-value" id="totalExpDisplay">$0.00</div>
+    </div>
+
+  </div>
+
+  <!-- ───────────── TAB 4: VEHICLE ───────────── -->
+  <div class="tab-panel" id="panel-vehicle">
+
+    <!-- Mileage rate panel -->
+    <div id="mileagePanel">
+      <div class="km-banner">
+        <div class="km-sub">Business Kilometres</div>
+        <div class="km-big" id="kmBigDisplay">0</div>
+        <div class="km-sub">km</div>
+        <div class="km-deduct" id="kmDeductDisplay">$0.00 deductible</div>
+      </div>
+
+      <p class="section-label">Mileage Log</p>
+      <div class="card">
+        <div class="card-body">
+          <div class="field-row">
+            <label class="field-label small">Total km (all purposes)</label>
+            <input class="field-input" id="fTotalKm" type="number" min="0" placeholder="0" oninput="sync()">
+          </div>
+          <div class="field-row">
+            <label class="field-label small">Business km (Uber trips)</label>
+            <input class="field-input" id="fBizKm" type="number" min="0" placeholder="0" oninput="sync()">
+          </div>
+          <div class="field-row">
+            <span class="field-label small">Business use %</span>
+            <div class="pct-pill" id="mileagePct" style="font-size:18px; padding:6px 14px;">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">IRD Rate Calculation</p>
+      <div class="card">
+        <div class="card-body">
+          <div class="report-row">
+            <span class="row-label dim">First 14,000 km × 83¢</span>
+            <span class="row-val" id="tier1Display">$0.00</span>
+          </div>
+          <div class="report-row">
+            <span class="row-label dim">Remaining km × 31¢</span>
+            <span class="row-val" id="tier2Display">$0.00</span>
+          </div>
+          <div class="report-row strong">
+            <span class="row-label" style="font-weight:700;">Total vehicle deduction</span>
+            <span class="row-val big" id="totalKmDeductDisplay">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">When using IRD mileage rate, you <strong>cannot</strong> also claim vehicle running costs (fuel, oil, tyres, etc.) as separate deductions.</div>
+    </div>
+
+    <!-- Actual costs panel -->
+    <div id="actualPanel" style="display:none;">
+      <p class="section-label">Business Use Calculation</p>
+      <div class="card">
+        <div class="card-body">
+          <div class="field-row">
+            <label class="field-label small">Total km (all purposes)</label>
+            <input class="field-input" id="fTotalKmA" type="number" min="0" placeholder="0" oninput="sync()">
+          </div>
+          <div class="field-row">
+            <label class="field-label small">Business km (Uber trips)</label>
+            <input class="field-input" id="fBizKmA" type="number" min="0" placeholder="0" oninput="sync()">
+          </div>
+          <div class="field-row">
+            <span class="field-label small">Business use %</span>
+            <div class="pct-pill" id="actualPct" style="font-size:18px; padding:6px 14px;">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">Deductible Vehicle Costs</p>
+      <div class="card">
+        <div class="card-body">
+          <div class="report-row">
+            <span class="row-label dim">Total vehicle costs</span>
+            <span class="row-val" id="totalVehicleCostDisplay">$0.00</span>
+          </div>
+          <div class="report-row">
+            <span class="row-label dim">× Business use %</span>
+            <span class="row-val" id="actualPctLabel">0%</span>
+          </div>
+          <div class="report-row strong">
+            <span class="row-label" style="font-weight:700;">Deductible vehicle costs</span>
+            <span class="row-val big" id="deductibleVehicleDisplay">$0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-box">Enter vehicle running costs in the <strong>Expenses</strong> tab. Business use % is applied automatically.</div>
+    </div>
+
+  </div>
+
+  <!-- ───────────── TAB 5: REPORT ───────────── -->
+  <div class="tab-panel" id="panel-report">
+
+    <!-- Print header (hidden in app, shown when printing) -->
+    <div class="print-only" style="margin-bottom:20px; padding-bottom:16px; border-bottom:3px solid var(--navy);">
+      <div style="font-size:20px; font-weight:800; color:var(--navy); letter-spacing:-0.3px;">SBA — Small Business Accounting</div>
+      <div style="font-size:14px; color:var(--muted); margin-top:2px;">Uber Driver Income &amp; Expense Report — DRAFT</div>
+    </div>
+
+    <!-- Client summary -->
+    <p class="section-label">Client Details</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="report-row"><span class="row-label">Client</span><span class="row-val" id="rClient">—</span></div>
+        <div class="report-row"><span class="row-label">IRD Number</span><span class="row-val" id="rIrd">—</span></div>
+        <div class="report-row"><span class="row-label">Tax Year</span><span class="row-val" id="rYear">—</span></div>
+        <div class="report-row"><span class="row-label">GST Registered</span><span class="row-val" id="rGst">No</span></div>
+        <div class="report-row"><span class="row-label">Vehicle Method</span><span class="row-val" id="rMethod">IRD Mileage Rate</span></div>
+      </div>
+    </div>
+
+    <!-- Income -->
+    <p class="section-label">Income</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="report-row"><span class="row-label">Gross Uber income</span><span class="row-val" id="rGrossIncome">$0.00</span></div>
+        <div class="report-row" id="rGstRow" style="display:none;">
+          <span class="row-label dim">Less: GST on income</span>
+          <span class="row-val neg" id="rGstDeduct">($0.00)</span>
+        </div>
+        <div class="report-row strong">
+          <span class="row-label" style="font-weight:700;">Net taxable income</span>
+          <span class="row-val big" id="rNetIncome">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deductions -->
+    <p class="section-label">Deductions</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="report-row"><span class="row-label" id="rVehicleLabel">Vehicle (mileage rate)</span><span class="row-val neg" id="rVehicle">$0.00</span></div>
+        <div class="report-row" id="rPhoneRow"><span class="row-label">Phone &amp; data</span><span class="row-val neg" id="rPhone">$0.00</span></div>
+        <div class="report-row" id="rAccRow"><span class="row-label">Accounting fees</span><span class="row-val neg" id="rAcc">$0.00</span></div>
+        <div class="report-row" id="rBankRow"><span class="row-label">Bank fees</span><span class="row-val neg" id="rBank">$0.00</span></div>
+        <div class="report-row" id="rSubsRow"><span class="row-label">Subscriptions</span><span class="row-val neg" id="rSubs">$0.00</span></div>
+        <div class="report-row" id="rOtherRow"><span class="row-label">Other expenses</span><span class="row-val neg" id="rOther">$0.00</span></div>
+        <div class="report-row strong">
+          <span class="row-label" style="font-weight:700;">Total deductions</span>
+          <span class="row-val big neg" id="rTotalDeduct">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Net Profit -->
+    <div class="net-banner" id="netBanner">
+      <span class="net-label">Net Profit / (Loss)</span>
+      <span class="net-value" id="rNetProfit">$0.00</span>
+    </div>
+
+    <!-- Vehicle summary -->
+    <p class="section-label">Vehicle Summary</p>
+    <div class="card">
+      <div class="card-body">
+        <div class="report-row"><span class="row-label">Business km</span><span class="row-val" id="rBizKm">0 km</span></div>
+        <div class="report-row"><span class="row-label">Total km</span><span class="row-val" id="rTotalKm">0 km</span></div>
+        <div class="report-row"><span class="row-label">Business use %</span><span class="row-val" id="rBizPct">0%</span></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:4px 0 8px; color:var(--muted); font-size:11px; line-height:1.6;">
+      Prepared by SBA — Small Business Accounting<br>
+      <span id="rBranch">New Brighton</span> · <span id="rDate"></span>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="window.print()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / Save as PDF
+      </button>
+      <button class="btn btn-danger" id="btnClear" onclick="clearAll()">Clear All Data</button>
+    </div>
+
+  </div>
+
+</div><!-- end .app-content -->
+
+<!-- ═══ BOTTOM TAB BAR ═══ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('client',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="tab-label">Client</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('income',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    <span class="tab-label">Income</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('expenses',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    <span class="tab-label">Expenses</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('vehicle',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2h-2"/><circle cx="9" cy="17" r="2"/><path d="M13 17H9"/><circle cx="16" cy="17" r="2"/></svg>
+    <span class="tab-label">Vehicle</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('report',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span class="tab-label">Report</span>
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'sba_uber_v2';
+
+let S = {
+  client: { name:'', ird:'', branch:'New Brighton', year:'2025', gst:false, method:'mileage' },
+  income: Array(12).fill(0),
+  veh: { fuel:0, oil:0, tyres:0, repairs:0, insurance:0, rego:0, wof:0, cleaning:0, parking:0 },
+  other: { phone:0, accounting:0, bank:0, subs:0, other:0 },
+  km: { total:0, biz:0, totalA:0, bizA:0 }
+};
+
+// ═══════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════
+const MONTH_NAMES = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+const VEH_FIELDS = [
+  { id:'vFuel',      key:'fuel',      label:'Fuel' },
+  { id:'vOil',       key:'oil',       label:'Oil & lubricants' },
+  { id:'vTyres',     key:'tyres',     label:'Tyres' },
+  { id:'vRepairs',   key:'repairs',   label:'Repairs & maintenance' },
+  { id:'vInsurance', key:'insurance', label:'Insurance' },
+  { id:'vRego',      key:'rego',      label:'Registration (rego)' },
+  { id:'vWof',       key:'wof',       label:'WOF' },
+  { id:'vCleaning',  key:'cleaning',  label:'Car wash & cleaning' },
+  { id:'vParking',   key:'parking',   label:'Parking & tolls' },
+];
+
+const OTHER_FIELDS = [
+  { id:'oPhone',      key:'phone',      label:'Phone & data (business %)' },
+  { id:'oAccounting', key:'accounting', label:'Accounting fees' },
+  { id:'oBank',       key:'bank',       label:'Bank fees' },
+  { id:'oSubs',       key:'subs',       label:'Subscriptions' },
+  { id:'oOther',      key:'other',      label:'Other expenses' },
+];
+
+// ═══════════════════════════════════════════
+//  BUILD DYNAMIC ROWS
+// ═══════════════════════════════════════════
+function buildMonthRows() {
+  const yr = parseInt(document.getElementById('fTaxYear').value || S.client.year);
+  const container = document.getElementById('monthRows');
+  container.innerHTML = '';
+
+  // Apr..Dec are yr-1, Jan..Mar are yr
+  const years = [
+    yr-1,yr-1,yr-1,yr-1,yr-1,yr-1,yr-1,yr-1,yr-1,
+    yr,yr,yr
+  ];
+
+  MONTH_NAMES.forEach((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'month-row';
+    row.innerHTML = `
+      <div class="month-year-tag"><strong>${m}</strong><br>${String(years[i]).slice(2)}</div>
+      <div class="month-input-wrap">
+        <span class="dollar-pre">$</span>
+        <input class="month-input" type="number" min="0" step="0.01"
+          id="m_${i}" placeholder="0.00"
+          oninput="updateMonth(${i}, this.value)">
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  // Restore values
+  S.income.forEach((v, i) => {
+    const el = document.getElementById('m_' + i);
+    if (el && v > 0) el.value = v;
+  });
+}
+
+function buildExpenseRows() {
+  // Vehicle rows
+  const vCont = document.getElementById('vehicleExpRows');
+  vCont.innerHTML = '';
+  VEH_FIELDS.forEach(f => {
+    vCont.appendChild(makeExpRow(f.id, f.label, () => {
+      S.veh[f.key] = parseFloat(document.getElementById(f.id).value) || 0;
+      compute();
+    }));
+  });
+
+  // Other rows
+  const oCont = document.getElementById('otherExpRows');
+  oCont.innerHTML = '';
+  OTHER_FIELDS.forEach(f => {
+    oCont.appendChild(makeExpRow(f.id, f.label, () => {
+      S.other[f.key] = parseFloat(document.getElementById(f.id).value) || 0;
+      compute();
+    }));
+  });
+}
+
+function makeExpRow(id, label, handler) {
+  const row = document.createElement('div');
+  row.className = 'field-row';
+  row.innerHTML = `
+    <label class="field-label small" for="${id}">${label}</label>
+    <div style="position:relative; width:110px; flex-shrink:0;">
+      <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;">$</span>
+      <input id="${id}" type="number" min="0" step="0.01"
+        style="width:100%;border:none;outline:none;font-size:16px;text-align:right;background:transparent;padding:10px 0 10px 14px;font-family:inherit;color:var(--text);"
+        placeholder="0.00">
+    </div>
+  `;
+  row.querySelector('input').addEventListener('input', handler);
+  return row;
+}
+
+// ═══════════════════════════════════════════
+//  SYNC FROM DOM TO STATE
+// ═══════════════════════════════════════════
+function sync() {
+  S.client.name   = document.getElementById('fClientName').value.trim();
+  S.client.ird    = document.getElementById('fIrd').value.trim();
+  S.client.branch = document.getElementById('fBranch').value;
+  S.client.year   = document.getElementById('fTaxYear').value;
+  S.client.gst    = document.getElementById('fGst').checked;
+
+  // Vehicle km
+  S.km.total  = parseFloat(document.getElementById('fTotalKm')?.value) || 0;
+  S.km.biz    = parseFloat(document.getElementById('fBizKm')?.value) || 0;
+  S.km.totalA = parseFloat(document.getElementById('fTotalKmA')?.value) || 0;
+  S.km.bizA   = parseFloat(document.getElementById('fBizKmA')?.value) || 0;
+
+  save();
+  compute();
+}
+
+function updateMonth(i, v) {
+  S.income[i] = parseFloat(v) || 0;
+  save();
+  compute();
+}
+
+// ═══════════════════════════════════════════
+//  COMPUTE & UPDATE ALL DISPLAYS
+// ═══════════════════════════════════════════
+function compute() {
+  // ── Income ──
+  const grossIncome = S.income.reduce((a,b) => a+b, 0);
+  const gstAmt   = S.client.gst ? grossIncome * 3 / 23 : 0;
+  const netIncome = grossIncome - gstAmt;
+
+  // ── Mileage deduction ──
+  const bizKm   = S.km.biz;
+  const totalKm = S.km.total;
+  const t1 = Math.min(bizKm, 14000) * 0.83;
+  const t2 = Math.max(0, bizKm - 14000) * 0.31;
+  const mileageDeduct = t1 + t2;
+  const mileagePct = totalKm > 0 ? (bizKm / totalKm * 100) : 0;
+
+  // ── Actual vehicle costs ──
+  const bizKmA   = S.km.bizA;
+  const totalKmA = S.km.totalA;
+  const actualPct = totalKmA > 0 ? (bizKmA / totalKmA) : 0;
+  const totalVehCost = Object.values(S.veh).reduce((a,b) => a+b, 0);
+  const deductibleVeh = totalVehCost * actualPct;
+
+  // ── Other expenses ──
+  const otherTotal = Object.values(S.other).reduce((a,b) => a+b, 0);
+
+  // ── Vehicle deduction for selected method ──
+  const vehicleDeduct = S.client.method === 'mileage' ? mileageDeduct : deductibleVeh;
+  const totalDeduct   = vehicleDeduct + otherTotal;
+  const netProfit     = netIncome - totalDeduct;
+
+  // ════ UPDATE INCOME TAB ════
+  document.getElementById('totalIncomeDisplay').textContent = fmt(grossIncome);
+  document.getElementById('incomeYearLabel').textContent    = 'Year ended 31 Mar ' + S.client.year;
+  const gstCard = document.getElementById('gstCard');
+  gstCard.style.display = S.client.gst ? 'block' : 'none';
+  if (S.client.gst) {
+    document.getElementById('gstExclDisplay').textContent = fmt(netIncome);
+    document.getElementById('gstAmtDisplay').textContent  = fmt(gstAmt);
+    document.getElementById('netIncomeDisplay').textContent = fmt(netIncome);
+  }
+
+  // ════ UPDATE VEHICLE TAB ════
+  document.getElementById('kmBigDisplay').textContent     = bizKm.toLocaleString('en-NZ');
+  document.getElementById('kmDeductDisplay').textContent  = fmt(mileageDeduct) + ' deductible';
+  document.getElementById('mileagePct').textContent       = mileagePct.toFixed(1) + '%';
+  document.getElementById('tier1Display').textContent     = fmt(t1);
+  document.getElementById('tier2Display').textContent     = bizKm > 14000 ? fmt(t2) : '$0.00';
+  document.getElementById('totalKmDeductDisplay').textContent = fmt(mileageDeduct);
+
+  document.getElementById('actualPct').textContent        = (actualPct * 100).toFixed(1) + '%';
+  document.getElementById('actualPctLabel').textContent   = (actualPct * 100).toFixed(1) + '%';
+  document.getElementById('totalVehicleCostDisplay').textContent = fmt(totalVehCost);
+  document.getElementById('deductibleVehicleDisplay').textContent = fmt(deductibleVeh);
+
+  // ════ UPDATE EXPENSES TAB ════
+  document.getElementById('totalExpDisplay').textContent = fmt(totalDeduct);
+
+  // ════ UPDATE HEADER ════
+  document.getElementById('headerSub').textContent = S.client.name || 'New client';
+  document.getElementById('headerMethod').textContent = S.client.method === 'mileage' ? 'Mileage Rate' : 'Actual Costs';
+
+  // ════ UPDATE REPORT TAB ════
+  document.getElementById('rClient').textContent = S.client.name || '—';
+  document.getElementById('rIrd').textContent    = S.client.ird || '—';
+  document.getElementById('rYear').textContent   = 'Year ended 31 March ' + S.client.year;
+  document.getElementById('rGst').textContent    = S.client.gst ? 'Yes' : 'No';
+  document.getElementById('rMethod').textContent = S.client.method === 'mileage' ? 'IRD Mileage Rate' : 'Actual Costs';
+
+  document.getElementById('rGrossIncome').textContent = fmt(grossIncome);
+  const rGstRow = document.getElementById('rGstRow');
+  rGstRow.style.display = S.client.gst ? 'flex' : 'none';
+  if (S.client.gst) document.getElementById('rGstDeduct').textContent = '(' + fmt(gstAmt) + ')';
+  document.getElementById('rNetIncome').textContent = fmt(netIncome);
+
+  document.getElementById('rVehicleLabel').textContent = S.client.method === 'mileage'
+    ? 'Vehicle (mileage rate)' : 'Vehicle (actual costs)';
+  document.getElementById('rVehicle').textContent  = fmt(vehicleDeduct);
+  document.getElementById('rPhone').textContent    = fmt(S.other.phone);
+  document.getElementById('rAcc').textContent      = fmt(S.other.accounting);
+  document.getElementById('rBank').textContent     = fmt(S.other.bank);
+  document.getElementById('rSubs').textContent     = fmt(S.other.subs);
+  document.getElementById('rOther').textContent    = fmt(S.other.other);
+  document.getElementById('rTotalDeduct').textContent = fmt(totalDeduct);
+
+  const npEl = document.getElementById('rNetProfit');
+  npEl.textContent = netProfit < 0 ? '(' + fmt(Math.abs(netProfit)) + ')' : fmt(netProfit);
+  npEl.className = 'net-value' + (netProfit < 0 ? ' loss' : '');
+
+  // Vehicle summary in report
+  const useBizKm   = S.client.method === 'mileage' ? bizKm   : bizKmA;
+  const useTotalKm = S.client.method === 'mileage' ? totalKm : totalKmA;
+  const usePct     = useTotalKm > 0 ? (useBizKm / useTotalKm * 100) : 0;
+  document.getElementById('rBizKm').textContent   = useBizKm.toLocaleString('en-NZ') + ' km';
+  document.getElementById('rTotalKm').textContent = useTotalKm.toLocaleString('en-NZ') + ' km';
+  document.getElementById('rBizPct').textContent  = usePct.toFixed(1) + '%';
+  document.getElementById('rBranch').textContent  = S.client.branch;
+  document.getElementById('rDate').textContent    = new Date().toLocaleDateString('en-NZ', {day:'numeric',month:'long',year:'numeric'});
+}
+
+// ═══════════════════════════════════════════
+//  FORMAT HELPERS
+// ═══════════════════════════════════════════
+function fmt(n) {
+  const abs = Math.abs(n || 0);
+  return '$' + abs.toLocaleString('en-NZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ═══════════════════════════════════════════
+//  METHOD TOGGLE
+// ═══════════════════════════════════════════
+function setMethod(m) {
+  S.client.method = m;
+  document.getElementById('segMileage').classList.toggle('active', m === 'mileage');
+  document.getElementById('segActual').classList.toggle('active', m === 'actual');
+
+  document.getElementById('mileagePanel').style.display   = m === 'mileage' ? 'block' : 'none';
+  document.getElementById('actualPanel').style.display    = m === 'actual'  ? 'block' : 'none';
+  document.getElementById('vehicleExpSection').style.display = m === 'actual' ? 'block' : 'none';
+
+  const desc = document.getElementById('methodDesc');
+  if (m === 'mileage') {
+    desc.innerHTML = '<div class="info-box"><strong>IRD Mileage Rate:</strong> Claim 83¢/km for first 14,000 business km, then 31¢/km. No receipts needed for vehicle running costs.</div>';
+  } else {
+    desc.innerHTML = '<div class="info-box"><strong>Actual Costs:</strong> Claim actual vehicle running costs × business use %. Keep all receipts. Enter vehicle costs in the Expenses tab.</div>';
+  }
+
+  save();
+  compute();
+}
+
+// ═══════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'report') compute();
+}
+
+// ═══════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch(e){}
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+
+    // Deep merge
+    S.client  = { ...S.client,  ...(saved.client || {}) };
+    S.income  = saved.income  || S.income;
+    S.veh     = { ...S.veh,    ...(saved.veh  || {}) };
+    S.other   = { ...S.other,  ...(saved.other || {}) };
+    S.km      = { ...S.km,     ...(saved.km || {}) };
+
+    // Restore DOM
+    document.getElementById('fClientName').value = S.client.name;
+    document.getElementById('fIrd').value        = S.client.ird;
+    document.getElementById('fBranch').value     = S.client.branch;
+    document.getElementById('fTaxYear').value    = S.client.year;
+    document.getElementById('fGst').checked      = S.client.gst;
+
+    // Restore vehicle km fields
+    const setV = (id, v) => { const el = document.getElementById(id); if(el && v) el.value = v; };
+    setV('fTotalKm',  S.km.total);
+    setV('fBizKm',    S.km.biz);
+    setV('fTotalKmA', S.km.totalA);
+    setV('fBizKmA',   S.km.bizA);
+
+    // Restore expense fields
+    VEH_FIELDS.forEach(f => { const el = document.getElementById(f.id); if(el && S.veh[f.key]) el.value = S.veh[f.key]; });
+    OTHER_FIELDS.forEach(f => { const el = document.getElementById(f.id); if(el && S.other[f.key]) el.value = S.other[f.key]; });
+
+    // Restore method
+    if (S.client.method === 'actual') setMethod('actual');
+
+    // Restore month income values
+    S.income.forEach((v, i) => {
+      const el = document.getElementById('m_' + i);
+      if (el && v > 0) el.value = v;
+    });
+
+  } catch(e) {}
+}
+
+function clearAll() {
+  if (!confirm('Clear all entered data? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+buildMonthRows();
+buildExpenseRows();
+load();
+compute();
+
+// Service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
